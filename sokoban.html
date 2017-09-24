@@ -24,12 +24,104 @@ to do:
 -jucam cu mouse-ul highligth piesele care se pot muta
 -centrare tabla
 */
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var draw_square = function(x,y) {
-	ctx.beginPath();
-	ctx.rect(x,y,50,50);
-	ctx.stroke();
+
+
+
+var level = [
+	"xxxxxxxxxxx",
+	"x   x     x",
+	"x   pbb   x",
+	"x   b     x",
+	"x   ooo   x",
+	"xxxxxxxxxxx",
+];
+
+var string_to_array = function(level) {
+	var a = [];
+	for(var i = 0; i < level.length; i++){
+		var l = level[i];
+		a.push(l);
+	}
+	return a;
 }
+
+for(var i = 0; i < level.length; i++){
+	level[i] = string_to_array(level[i]);
+}
+
+var draw_square = function(i,j,type) {
+	var w = 50;
+	var x = i * w;
+	var y = j * w;
+	ctx.beginPath();
+	ctx.rect(x,y,w,w);
+	if(type == "x"){
+		ctx.fillStyle = "red";
+		ctx.fill();
+	}
+	if(type == "p"){
+		ctx.fillStyle = "black";
+		ctx.fill();
+	}
+	if(type == "b"){
+		ctx.fillStyle = "brown";
+		ctx.fill();
+	}
+	if(type == "o"){
+		ctx.fillStyle = "pink";
+		ctx.fill();
+	}
+}
+
+var draw_level = function(){
+	ctx.beginPath();
+	ctx.clearRect(0,0,canvas.width, canvas.height)
+	for(var j = 0; j < level.length; j++){
+		for(var i = 0; i < level[j].length; i++){
+			var type = level[j][i];
+			draw_square(i,j,type);
+		}
+	}
+}
+
+var find_player_pos = function() {
+	for(var j = 0; j <= level.length; j++){
+		for(var i = 0; i <= level[j].length; i++){
+			if(level[j][i] == "p"){
+				return {j: j, i: i};
+			}
+		}
+	}
+}
+
+var pos;
+
+var key_down = function(event){
+	if(event.key=="ArrowUp"){
+		level[pos.j][pos.i] = " ";
+		pos.j--;
+		level[pos.j][pos.i] = "p";
+		draw_level();
+	}
+	else if(event.key=="ArrowDown"){
+		level[pos.j][pos.i] = " ";
+		pos.j++;
+		level[pos.j][pos.i] = "p";
+		draw_level();
+	}
+	else if(event.key=="ArrowRight"){
+	}
+	else if(event.key=="ArrowLeft"){
+	}
+}
+
+draw_level();
+pos = find_player_pos();
+
+addEventListener("keydown", key_down)
+
 
 </script>
