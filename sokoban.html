@@ -1,0 +1,34 @@
+<canvas
+	id="myCanvas"
+	width="600"
+	height="300"></canvas>
+<script>
+/*
+to do:
+-desenam jocul
+	- desenam o patratica
+	- desenam mai multe tipuri de patratele: zid, player, cutie, floor si locul unde trebuie sa ajunga cutia
+	- aranjam patratelele la anumite coordonate in functie de tipul patratelului
+	- coordonam player-ul astfel incat sa ajunga de la o pozitie la alta
+	- pentru fiecare tip de patratica punem o conditie:
+		cutia sa se poate muta,
+		plyaerul sa isi poate schimba pozitia si sa impinga cutia,
+		zidul sa fie o bariera pentru cutie player
+	- player-ul poate muta o singura cutie
+	- cutia trebuie sa aiba un traseu posibil spre punctul final
+-sa se afiseze "ai castigat!"
+-miscarea cu animatii
+-sa ramana acelasi cand dam refresh
+-buton restart
+-jucam cu mouse-ul highligth piesele care se pot muta
+-centrare tabla
+*/
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var draw_square = function(x,y) {
+	ctx.beginPath();
+	ctx.rect(x,y,50,50);
+	ctx.stroke();
+}
+
+</script>
