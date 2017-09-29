@@ -5,7 +5,6 @@
 <script>
 /*
 to do:
-
 -desenam jocul
 	- desenam o patratica
 	- desenam mai multe tipuri de patratele: zid, player, cutie, floor si locul unde trebuie sa ajunga cutia
@@ -24,12 +23,8 @@ to do:
 -jucam cu mouse-ul highligth piesele care se pot muta
 -centrare tabla
 */
-
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-
-
-
 var level = [
 	"xxxxxxxxxxx",
 	"x   x     x",
@@ -38,7 +33,6 @@ var level = [
 	"x   ooo   x",
 	"xxxxxxxxxxx",
 ];
-
 var string_to_array = function(level) {
 	var a = [];
 	for(var i = 0; i < level.length; i++){
@@ -47,11 +41,9 @@ var string_to_array = function(level) {
 	}
 	return a;
 }
-
 for(var i = 0; i < level.length; i++){
 	level[i] = string_to_array(level[i]);
 }
-
 var draw_square = function(i,j,type) {
 	var w = 50;
 	var x = i * w;
@@ -75,7 +67,6 @@ var draw_square = function(i,j,type) {
 		ctx.fill();
 	}
 }
-
 var draw_level = function(){
 	ctx.beginPath();
 	ctx.clearRect(0,0,canvas.width, canvas.height)
@@ -86,7 +77,6 @@ var draw_level = function(){
 		}
 	}
 }
-
 var find_player_pos = function() {
 	for(var j = 0; j <= level.length; j++){
 		for(var i = 0; i <= level[j].length; i++){
@@ -98,30 +88,48 @@ var find_player_pos = function() {
 }
 
 var pos;
-
 var key_down = function(event){
+	var new_pos = {j: pos.j, i: pos.i};
+	var new_pos_box = {j: pos.j, i: pos.i};
 	if(event.key=="ArrowUp"){
-		level[pos.j][pos.i] = " ";
-		pos.j--;
-		level[pos.j][pos.i] = "p";
-		draw_level();
+		new_pos.j = new_pos.j-1;
+		new_pos_box.j = new_pos_box.j-2;
 	}
 	else if(event.key=="ArrowDown"){
-		level[pos.j][pos.i] = " ";
-		pos.j++;
-		level[pos.j][pos.i] = "p";
-		draw_level();
+		new_pos.j = new_pos.j+1;
+		new_pos_box.j = new_pos_box.j+2;
 	}
 	else if(event.key=="ArrowRight"){
-	}
+		new_pos.i = new_pos.i+1;
+		new_pos_box.i = new_pos_box.i+2;
+	}	
 	else if(event.key=="ArrowLeft"){
+		new_pos.i = new_pos.i-1;
+		new_pos_box.i = new_pos_box.i-2;
 	}
-}
+	console.log(new_pos)
+	if(level[new_pos.j][new_pos.i] == "b"){
+		if(level[new_pos_box.j][new_pos_box.i] !== "x"){
+			if(level[new_pos_box.j][new_pos_box.i] !== "b"){
+				level[pos.j][pos.i] = " ";
+				pos = new_pos;
+				level[new_pos.j][new_pos.i] = "p";
+				new_pos = new_pos_box;
+				level[new_pos_box.j][new_pos_box.i] = "b";
+				draw_level();
+			}
+		}
 
+	}
+	else if(level[new_pos.j][new_pos.i] !== "x"){
+		level[pos.j][pos.i] = " ";
+		pos = new_pos;
+		level[new_pos.j][new_pos.i] = "p";
+		draw_level();
+	}
+	
+}
 draw_level();
 pos = find_player_pos();
-
 addEventListener("keydown", key_down)
-
-
 </script>
