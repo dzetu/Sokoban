@@ -25,6 +25,8 @@ to do:
 */
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
+// NOTE: all the lines of a level must have the same length!
 var level = [
 	"xxxxxxxxxxx",
 	"x   x     x",
@@ -33,6 +35,7 @@ var level = [
 	"x   ooo   x",
 	"xxxxxxxxxxx",
 ];
+
 var string_to_array = function(level) {
 	var a = [];
 	for(var i = 0; i < level.length; i++){
@@ -44,6 +47,7 @@ var string_to_array = function(level) {
 for(var i = 0; i < level.length; i++){
 	level[i] = string_to_array(level[i]);
 }
+
 var draw_square = function(i,j,type) {
 	var w = 50;
 	var x = i * w;
@@ -54,11 +58,11 @@ var draw_square = function(i,j,type) {
 		ctx.fillStyle = "red";
 		ctx.fill();
 	}
-	if(type == "p"){
+	if(type == "p" || type == "P"){
 		ctx.fillStyle = "black";
 		ctx.fill();
 	}
-	if(type == "b"){
+	if(type == "b" || type == "B"){
 		ctx.fillStyle = "brown";
 		ctx.fill();
 	}
@@ -80,7 +84,7 @@ var draw_level = function(){
 var find_player_pos = function() {
 	for(var j = 0; j <= level.length; j++){
 		for(var i = 0; i <= level[j].length; i++){
-			if(level[j][i] == "p"){
+			if(level[j][i] == "p" || level[j][i] == "P"){
 				return {j: j, i: i};
 			}
 		}
@@ -89,45 +93,116 @@ var find_player_pos = function() {
 
 var pos;
 var key_down = function(event){
-	var new_pos = {j: pos.j, i: pos.i};
-	var new_pos_box = {j: pos.j, i: pos.i};
+
+	// player's new position, set if the player moves.
+	var new_pos;
+	// box-that-was-pushed new position, set if the player moves.
+	var new_pos_box;
+
+	// find the position where the player should move at.
+	// also find the position where an eventual box should move at.
 	if(event.key=="ArrowUp"){
-		new_pos.j = new_pos.j-1;
-		new_pos_box.j = new_pos_box.j-2;
+		new_pos = {j: pos.j-1, i: pos.i};
+		new_pos_box = {j: pos.j-2, i: pos.i};
 	}
 	else if(event.key=="ArrowDown"){
-		new_pos.j = new_pos.j+1;
-		new_pos_box.j = new_pos_box.j+2;
+		new_pos = {j: pos.j+1, i: pos.i};
+		new_pos_box = {j: pos.j+2, i: pos.i};
 	}
 	else if(event.key=="ArrowRight"){
-		new_pos.i = new_pos.i+1;
-		new_pos_box.i = new_pos_box.i+2;
-	}	
+		new_pos = {j: pos.j, i: pos.i+1};
+		new_pos_box = {j: pos.j, i: pos.i+2};
+	}
 	else if(event.key=="ArrowLeft"){
-		new_pos.i = new_pos.i-1;
-		new_pos_box.i = new_pos_box.i-2;
+		new_pos = {j: pos.j, i: pos.i-1};
+		new_pos_box = {j: pos.j, i: pos.i-2};
 	}
-	console.log(new_pos)
-	if(level[new_pos.j][new_pos.i] == "b"){
-		if(level[new_pos_box.j][new_pos_box.i] !== "x"){
-			if(level[new_pos_box.j][new_pos_box.i] !== "b"){
-				level[pos.j][pos.i] = " ";
-				pos = new_pos;
-				level[new_pos.j][new_pos.i] = "p";
-				new_pos = new_pos_box;
-				level[new_pos_box.j][new_pos_box.i] = "b";
-				draw_level();
-			}
-		}
 
+	// player didn't move, some other key must have been pressed.
+	if (!new_pos)
+		return;
+
+	// exit if the box-to-be-moved' new position is outside the
+	// level bounds.
+	if (new_pos_box.j < 0)
+		return;
+	if (new_pos_box.i < 0)
+		return;
+	if (new_pos_box.j >= level.length)
+		return;
+	if (new_pos_box.i >= level[0].length)
+		return;
+
+	// c1: what is at player's initial position
+	// c2: what is at player's new position
+	// c3: what is at box's new position
+	var c1 = level[pos.j][pos.i];
+	var c2 = level[new_pos.j][new_pos.i];
+	var c3 = level[new_pos_box.j][new_pos_box.i];
+
+	// b1: what is at the player's new position
+	// b2: what is at the eventual box's new position
+	var b1 = c2;
+	var b2 = c3;
+	var can_move = true;
+
+	// decide what to leave in player's place.
+	// if player's on a box dest. then it leaves behind an empty dest,
+	// else it leaves behind a space.
+	if(c1 == "P"){
+		c1 = "o";
+	} else {
+		c1 = " ";
 	}
-	else if(level[new_pos.j][new_pos.i] !== "x"){
-		level[pos.j][pos.i] = " ";
-		pos = new_pos;
-		level[new_pos.j][new_pos.i] = "p";
-		draw_level();
+
+	// decide what to put where the player moves and if the player
+	// can actually move.
+	// if the player steps on a dest. (with or without a box on it)
+	//	then it becomes "a player on a dest".
+	if(c2 == "o" || c2 == "B"){
+		c2 = "P";
 	}
-	
+	// if the player steps on a space or a box then it becomes a player.
+	else if(c2 == " " || c2 == "b"){
+		c2 = "p";
+	yh}
+	// in all other cases, the player cannot move.
+	else{
+		can_move = false;
+	}
+
+	// decide what to put where the box moves and if the box can actually
+	// be moved, and therefore if the player can be moved.
+	// if the player pushes a box (i.e. there's a box at player's new pos)
+	if(b1 == "b" || b1 == "B"){
+		// if in front of the box there's a space, we put a box there.
+		if(b2 == " "){
+			b2 = "b";
+		}
+		// if in front of the box there's a dest., we put a
+		// "box on a dest" there.
+		else if(b2 == "o"){
+			b2 = "B"
+		}
+		// in all othere cases, the box can't move,
+		// therefore the player can't move.
+		else{
+			can_move = false;
+		}
+	}
+
+	// exit if we figured that we can't move the player or the box.
+	if (!can_move)
+		return;
+
+	// we put back into the level the new values of the squares.
+	level[pos.j][pos.i] = c1;
+	level[new_pos.j][new_pos.i] = c2;
+	level[new_pos_box.j][new_pos_box.i] = b2;
+
+	pos = new_pos;
+
+	draw_level();
 }
 draw_level();
 pos = find_player_pos();
